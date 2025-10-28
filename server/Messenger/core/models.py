@@ -5,8 +5,8 @@ from django.db import models
 
 class User(models.Model):
     id = models.AutoField(primary_key=True)
-    login = models.CharField(max_length=32)
-    password_hash = models.CharField(max_length=64)
+    login = models.CharField(max_length=32, unique=True)
+    password_hash = models.CharField(max_length=128)
     nickname = models.CharField(max_length=64)
     last_login = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
