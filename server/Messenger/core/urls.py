@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import RegisterView, ChatListView
+from .views import *
 
 
 urlpatterns = [
@@ -12,4 +12,8 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('chats/', ChatListView.as_view(), name='chat_list'),
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('user/search/', UserSearchView.as_view(), name='user_search'),
+    path('user/<int:pk>/', UserView.as_view(), name='user'),
+    path('user/me/', MeView.as_view(), name='user_me'),  
 ]

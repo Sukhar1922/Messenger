@@ -40,3 +40,9 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = ['id', 'chat_name', 'is_private', 'users', 'created_at']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'login', 'nickname', 'created_at', 'last_login']
