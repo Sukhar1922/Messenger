@@ -1,18 +1,19 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
 
-class User(models.Model):
-    id = models.AutoField(primary_key=True)
+class User(AbstractUser):
     login = models.CharField(max_length=32, unique=True)
-    password_hash = models.CharField(max_length=128)
     nickname = models.CharField(max_length=64)
-    last_login = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    USERNAME_FIELD = 'login'
+    REQUIRED_FIELDS = []   # при создании суперпользователя будут спрашивать только логин + пароль
+
     def __str__(self):
-        return f'Пользователь {self.id}'
+        return f'Пользователь {self.login}'
 
 
 class Chat(models.Model):

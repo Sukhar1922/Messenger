@@ -9,23 +9,14 @@ from .serializers import *
 
 from rest_framework import generics
 
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-
-    def perform_create(self, serializer):
-        user = serializer.save()
-        refresh = RefreshToken.for_user(user)
-        self.token_data = {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-        }
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.data.update(self.token_data)
-        return response
 
 
 class ChatListView(generics.ListAPIView):
