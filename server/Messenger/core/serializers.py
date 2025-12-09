@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import *
 from django.contrib.auth.hashers import make_password
 
 
@@ -22,3 +22,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         validated_data['password_hash'] = make_password(password)
         return super().create(validated_data)
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    users = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = Chat
+        fields = ['id', 'chat_name', 'is_private', 'users', 'created_at']
