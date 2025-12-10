@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'core',
     'drf_spectacular',
+    'channels',
 ]
+
+ASGI_APPLICATION = "Messenger.asgi.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
