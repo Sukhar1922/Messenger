@@ -1,16 +1,44 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.utils import timezone
 
 # Create your models here.
 
+class UserManager(BaseUserManager):
+    def create_user(self, login, password=None, **extra_fields):
+        if not login:
+            raise ValueError("Login обязателен")
 
-class User(AbstractUser):
+        user = self.model(login=login, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, login, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("superuser must have is_superuser=True.")
+
+        return self.create_user(login, password, **extra_fields)
+
+class User(AbstractBaseUser, PermissionsMixin):
     login = models.CharField(max_length=32, unique=True)
     nickname = models.CharField(max_length=64)
-    created_at = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager()
 
     USERNAME_FIELD = 'login'
-    REQUIRED_FIELDS = []   # при создании суперпользователя будут спрашивать только логин + пароль
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return f'Пользователь {self.login}'
