@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'core',
     'drf_spectacular',
     'channels',
+    'frontend',
 ]
 
 ASGI_APPLICATION = "Messenger.asgi.application"
