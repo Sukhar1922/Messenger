@@ -4,3 +4,11 @@ from django.shortcuts import render
 
 def test(request):
     return render(request, 'frontend/test.html')
+
+
+def base(request):
+    return render(request, 'frontend/base.html')
+
+
+def login_view(request):
+    return render(request, 'frontend/login.html')

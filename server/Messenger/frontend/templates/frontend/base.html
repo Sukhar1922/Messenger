@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мессенджер{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'frontend/css/base.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="burger" onclick="toggleMenu()">
+                <div></div><div></div><div></div>
+            </div>
+            <div class="header-title">Мессенджер</div>
+        </div>
+
+        <div class="header-actions">
+            {% block extra_header_actions %}{% endblock %}
+        </div>
+    </header>
+
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

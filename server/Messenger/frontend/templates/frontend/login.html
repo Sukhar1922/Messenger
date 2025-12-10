@@ -1,0 +1,37 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+
+{% block title %}Авторизация{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'frontend/css/login.css' %}">
+{% endblock %}
+
+{% block main %}
+<div class="auth-wrapper">
+
+    <div class="switcher">
+        <button id="loginBtn" class="switch-active">Авторизация</button>
+        <button id="registerBtn">Регистрация</button>
+    </div>
+
+    <div class="form-window">
+        <form id="loginForm" class="form-block">
+            <label>Логин</label>
+            <input type="text" id="login" placeholder="Login" required>
+
+            <label>Пароль</label>
+            <input type="password" id="password" placeholder="********" required>
+
+            <button class="submit-btn" type="submit">Войти</button>
+        </form>
+        
+        
+    </div>
+    <div id="error" class="error"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'frontend/js/login.js' %}"></script>
+{% endblock %}
