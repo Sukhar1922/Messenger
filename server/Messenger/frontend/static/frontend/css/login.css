@@ -9,12 +9,13 @@
 .switcher {
     display: flex;
     gap: 20px;
+    width: 100%;
 }
 
 .switcher button {
-    padding: 10px 20px;
+    padding: 15px 50px;
     border: none;
-    border-radius: 20px;
+    border-radius: 30px;
     background: #A9C8F3;
     color: white;
     cursor: pointer;
