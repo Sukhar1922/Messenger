@@ -12,3 +12,7 @@ def base(request):
 
 def login_view(request):
     return render(request, 'frontend/login.html')
+
+
+def register_view(request):
+    return render(request, 'frontend/register.html')

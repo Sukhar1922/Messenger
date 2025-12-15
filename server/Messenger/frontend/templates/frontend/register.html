@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% load static %}
 
-{% block title %}Авторизация{% endblock %}
+{% block title %}Регистрация{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'frontend/css/login.css' %}">
@@ -11,16 +11,19 @@
 <div class="wrapper">
 
     <div class="switcher">
-        <button id="loginBtn" class="switch-active">Авторизация</button>
-        <a href="{% url 'register' %}">
-            <button id="registerBtn">Регистрация</button>
-        </a>  
+        <a href="{% url 'login' %}">
+            <button id="loginBtn">Авторизация</button>
+        </a>
+        <button id="registerBtn" class="switch-active">Регистрация</button>
     </div>
 
     <div class="form-window">
-        <form id="loginForm" class="form-block">
+        <form id="registerForm" class="form-block">
             <label>Логин</label>
-            <input type="text" id="login" placeholder="Login" required>
+            <input type="text" id="login" placeholder="Логин" required>
+            
+            <label>Псевдоним</label>
+            <input type="text" id="nickname" placeholder="Псевдоним" required>
 
             <label>Пароль</label>
             <input type="password" id="password" placeholder="********" required>
@@ -35,5 +38,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'frontend/js/login.js' %}"></script>
+<script src="{% static 'frontend/js/register.js' %}"></script>
 {% endblock %}
