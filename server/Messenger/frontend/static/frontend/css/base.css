@@ -51,6 +51,12 @@ body {
     gap: 5px;
 }
 
+.header-actions-text {
+    margin: 0 5px;
+    color: white;
+    font-size: 16px;
+}
+
 .glass-button {
     background: rgba(125, 163, 201, 0.75);
     border: none;

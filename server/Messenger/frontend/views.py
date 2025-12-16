@@ -16,3 +16,7 @@ def login_view(request):
 
 def register_view(request):
     return render(request, 'frontend/register.html')
+
+
+def main_view(request):
+    return render(request, 'frontend/main.html')
