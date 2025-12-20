@@ -16,19 +16,7 @@
 
     <aside class="chat-sidebar">
         <div class="sidebar-title">Чаты</div>
-
-        <div class="chats">
-            {% for _ in '12' %}
-            <div class="chat-item">
-                <div class="chat-avatar"></div>
-                <div class="chat-meta">
-                    <div class="chat-name">Андрей</div>
-                    <div class="chat-last">Как дела?</div>
-                </div>
-                <div class="chat-time">18:04</div>
-            </div>
-            {% endfor %}
-        </div>
+        <div class="chats" id="chatList"></div>
     </aside>
 
     <section class="chat-area">

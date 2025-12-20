@@ -1,4 +1,9 @@
 import { greeting_text } from "./ui/greeting_text.js";
+import { ChatItem } from "./ui/chatItem.js";
+
+
+const chatElements = new Map(); // chatId -> HTMLElement
+let chatList = null;
 
 
 async function APIfetch(link, method, withAccess=false, body=null) {
@@ -45,17 +50,6 @@ async function loadUserData() {
 }
 
 
-// function getUserData() {
-//     // refreshAccessToken();
-//     loadUserData();
-
-//     var user = localStorage.getItem("user_data");
-//     if (user) {
-//         user = JSON.parse(user);
-//     }
-// };
-
-
 async function refreshAccessToken() {
     const refresh = localStorage.getItem("refresh");
     if (!refresh) {
@@ -92,12 +86,67 @@ function logout() {
     redirectToLogin();
 }
 
+function normalizeChat(apiChat) {
+    return {
+        id: apiChat.id,
+        name: apiChat.chat_name,
+        lastMessage: "Нет сообщений",
+        time: "",
+        isPrivate: apiChat.is_private
+    };
+}
+
+async function loadChats() {
+    const { data } = await APIfetch("/api/chats/", "GET", true);
+
+    chatList.innerHTML = "";
+
+    data.forEach(apiChat => {
+        const chat = normalizeChat(apiChat);
+        const el = ChatItem(chat);
+
+        chatElements.set(chat.id, el);
+        chatList.appendChild(el);
+    });
+}
+
+function onIncomingMessage(msg) {
+    let el = chatElements.get(msg.chat_id);
+
+    // если чата ещё нет (новый чат)
+    if (!el) {
+        const chat = {
+            id: msg.chat_id,
+            name: msg.chat_name,
+            lastMessage: msg.text,
+            time: msg.time
+        };
+
+        el = ChatItem(chat);
+        chatElements.set(chat.id, el);
+        chatList.prepend(el);
+        return;
+    }
+
+    el.querySelector(".chat-last").textContent = msg.text;
+    el.querySelector(".chat-time").textContent = msg.time;
+
+    chatList.prepend(el);
+
+    el.classList.add("chat-new");
+    setTimeout(() => el.classList.remove("chat-new"), 600);
+}
+
 async function main() {
     const user = await loadUserData();
     if (!user) return;
 
     const header = document.querySelector(".header-actions");
     header.appendChild(greeting_text(user.nickname));
+
+    chatList = document.getElementById("chatList");
+
+    await loadChats();
 }
 
 main();
