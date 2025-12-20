@@ -18,6 +18,9 @@ async function APIfetch(link, method, withAccess=false, headers={}, body={}) {
 
     console.log("API fetch: " + response.status);
 
+    data = await response.json();
+    // console.log("API fetch data:", data);
+
     return response;
 }
 
@@ -36,15 +39,15 @@ async function loadUserData() {
 
         if (response.status === 401) {
             await refreshAccessToken();
+            return await loadUserData();
         };
     }
     catch (error) {
         console.error('Error fetching user data:', error);
-        redirectToLogin();
-        return loadUserData();
+        return redirectToLogin();
     }
 
-    const data = await response.json();
+    // const data = await response.json();
     console.log("User data:", data);
     localStorage.setItem("user_data", JSON.stringify(data));
 
@@ -53,20 +56,27 @@ async function loadUserData() {
 
 
 function getUserData() {
+    // refreshAccessToken();
     loadUserData();
 };
 
 
 async function refreshAccessToken() {
     const refresh = localStorage.getItem('refresh');
+    console.log("Refreshing access token with refresh token:", refresh);
     try {
-        var response = await APIfetch("/api/token/refresh/", "POST", body={
-            "refresh": refresh,
-        });
+        var response = await APIfetch(
+            "/api/token/refresh/", 
+            "POST",
+            withAccess=false,
+            {},
+            {"refresh": refresh,},
+        );
     }
     catch (error) {
         console.error('Error fetching user data:', error);
-        redirectToLogin();
+        // redirectToLogin();
+        return;
     }
 
     localStorage.setItem("access", data.access);
