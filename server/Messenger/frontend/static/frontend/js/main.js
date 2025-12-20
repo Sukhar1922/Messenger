@@ -90,7 +90,10 @@ function redirectToLogin() {
 
 
 function logout() {
-
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user_data");
+    redirectToLogin();
 }
 
 getUserData();
