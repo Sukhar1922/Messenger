@@ -3,11 +3,62 @@
 
 {% block title %}Мессенджер{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'frontend/css/messenger.css' %}">
+{% endblock %}
+
 {% block extra_header_actions %}
 
 {% endblock %}
 
+{% block main %}
+<div class="messenger">
+
+    <aside class="chat-sidebar">
+        <div class="sidebar-title">Чаты</div>
+
+        <div class="chats">
+            {% for _ in '12' %}
+            <div class="chat-item">
+                <div class="chat-avatar"></div>
+                <div class="chat-meta">
+                    <div class="chat-name">Андрей</div>
+                    <div class="chat-last">Как дела?</div>
+                </div>
+                <div class="chat-time">18:04</div>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <section class="chat-area">
+        <header class="chat-header">
+            <div class="chat-avatar"></div>
+            <div class="chat-title">Андрей</div>
+        </header>
+
+        <div class="chat-content">
+            <div class="message incoming">Привет</div>
+            <div class="message incoming">Как дела?</div>
+            <div class="message outgoing">Привет</div>
+        </div>
+
+        <footer class="chat-input">
+            <textarea placeholder="Сообщение..."></textarea>
+            <button>➤</button>
+        </footer>
+    </section>
+
+</div>
+{% endblock %}
+
 
 {% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatContent = document.querySelector(".chat-content");
+        chatContent.scrollTop = chatContent.scrollHeight;
+    });
+</script>
 <script type="module" src="{% static 'frontend/js/main.js' %}" defer></script>
 {% endblock %}
