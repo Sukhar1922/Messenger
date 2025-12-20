@@ -1,87 +1,83 @@
-async function APIfetch(link, method, withAccess=false, headers={}, body={}) {
+import { greeting_text } from "./ui/greeting_text.js";
+
+
+async function APIfetch(link, method, withAccess=false, body=null) {
+    const headers = {};
+
     if (withAccess) {
-        const access = localStorage.getItem('access');
+        const access = localStorage.getItem("access");
         headers["Authorization"] = "Bearer " + access;
     }
 
-    const options = {
-        method,
-        headers
-    };
-
     if (body && method !== "GET") {
-        options.body = JSON.stringify(body);
         headers["Content-Type"] = "application/json";
     }
 
-    const response = await fetch(link, options);
+    const response = await fetch(link, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+    });
 
-    console.log("API fetch: " + response.status);
-
-    data = await response.json();
-    // console.log("API fetch data:", data);
-
-    return response;
+    const data = await response.json();
+    return { response, data };
 }
 
 
 async function loadUserData() {
-    // checking if access token exists
-    const access = localStorage.getItem('access');
+    const access = localStorage.getItem("access");
     if (!access) {
         redirectToLogin();
-        return;
+        return null;
     }
 
-    // if access token exists, try to get user data
-    try {
-        var response = await APIfetch("/api/user/me/", "GET", withAccess=true);
+    const { response, data } = await APIfetch("/api/user/me/", "GET", true);
 
-        if (response.status === 401) {
-            await refreshAccessToken();
-            return await loadUserData();
-        };
-    }
-    catch (error) {
-        console.error('Error fetching user data:', error);
-        return redirectToLogin();
+    if (response.status === 401) {
+        const refreshed = await refreshAccessToken();
+        if (!refreshed) return null;
+
+        return await loadUserData();
     }
 
-    // const data = await response.json();
-    console.log("User data:", data);
     localStorage.setItem("user_data", JSON.stringify(data));
+    return data;
+}
 
-    console.log("User data loaded " + response.status);
-};
 
+// function getUserData() {
+//     // refreshAccessToken();
+//     loadUserData();
 
-function getUserData() {
-    // refreshAccessToken();
-    loadUserData();
-};
+//     var user = localStorage.getItem("user_data");
+//     if (user) {
+//         user = JSON.parse(user);
+//     }
+// };
 
 
 async function refreshAccessToken() {
-    const refresh = localStorage.getItem('refresh');
-    console.log("Refreshing access token with refresh token:", refresh);
-    try {
-        var response = await APIfetch(
-            "/api/token/refresh/", 
-            "POST",
-            withAccess=false,
-            {},
-            {"refresh": refresh,},
-        );
+    const refresh = localStorage.getItem("refresh");
+    if (!refresh) {
+        logout();
+        return false;
     }
-    catch (error) {
-        console.error('Error fetching user data:', error);
-        // redirectToLogin();
-        return;
+
+    const { response, data } = await APIfetch(
+        "/api/token/refresh/",
+        "POST",
+        false,
+        { refresh }
+    );
+
+    if (!response.ok || !data.access) {
+        logout();
+        return false;
     }
 
     localStorage.setItem("access", data.access);
-    return;
-};
+    return true;
+}
 
 
 function redirectToLogin() {
@@ -96,4 +92,12 @@ function logout() {
     redirectToLogin();
 }
 
-getUserData();
+async function main() {
+    const user = await loadUserData();
+    if (!user) return;
+
+    const header = document.querySelector(".header-actions");
+    header.appendChild(greeting_text(user.nickname));
+}
+
+main();
