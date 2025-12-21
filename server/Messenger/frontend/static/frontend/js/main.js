@@ -139,7 +139,7 @@ function onIncomingMessage(msg) {
 
 async function loadMessages(chatId) {
     const { data } = await APIfetch(
-        `/api/chats/${chatId}/messages`,
+        `/api/chats/${chatId}/messages/`,
         "GET",
         true
     );

@@ -81,3 +81,21 @@ class UserSearchView(generics.ListAPIView):
         if q:
             queryset = queryset.filter(nickname__icontains=q)
         return queryset
+
+
+class ChatMessageView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        chat_id = self.kwargs['chat_id']
+        return Message.objects.filter(chat__id=chat_id, chat__users=self.request.user).order_by("writed_at")
+
+    def perform_create(self, serializer):
+        chat_id = self.kwargs['chat_id']
+        chat = Chat.objects.filter(id=chat_id, users=self.request.user).first()
+        if not chat:
+            from rest_framework.exceptions import NotFound
+            raise NotFound("Chat not found")
+        serializer.save(chat=chat, user=self.request.user)
+    
