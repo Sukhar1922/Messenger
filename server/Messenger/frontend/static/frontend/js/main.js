@@ -190,6 +190,32 @@ async function loadChats() {
     });
 }
 
+async function sendMessage() {
+    const messageInput = document.getElementById("messageInput");
+    const chatContent = document.getElementById("chatContent");
+    const text = messageInput.value.trim();
+    if (!text || !activeChatId) return;
+
+    const { data, response } = await APIfetch(
+        `/api/chats/${activeChatId}/messages/`,
+        "POST",
+        true,
+        { text_content: text }
+    );
+
+    if (!response.ok) return;
+
+    // Добавляем сообщение локально
+    const currentUser = JSON.parse(localStorage.getItem("user_data"));
+    chatContent.appendChild(MessageItem({
+        text: data.text_content,
+        outgoing: true
+    }));
+
+    chatContent.scrollTop = chatContent.scrollHeight;
+    messageInput.value = "";
+}
+
 async function main() {
     const user = await loadUserData();
     if (!user) return;
@@ -200,6 +226,10 @@ async function main() {
     chatList = document.getElementById("chatList");
     chatHeader = document.getElementById("chatHeader");
     chatContent = document.getElementById("chatContent");
+
+    document
+        .getElementById("sendBtn")
+        .addEventListener("click", sendMessage);
 
     await loadChats();
 }
