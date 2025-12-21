@@ -1,6 +1,6 @@
 import { h } from "./h.js";
 
-export function ChatItem(chat) {
+export function ChatItem(chat, onClick) {
     const el = h(`
         <div class="chat-item" data-chat-id="${chat.id}">
             <div class="chat-avatar"></div>
@@ -13,6 +13,8 @@ export function ChatItem(chat) {
             <div class="chat-time">${chat.time}</div>
         </div>
     `);
+    
+    el.addEventListener("click", () => onClick(chat.id));
 
     return el;
 }
