@@ -198,14 +198,27 @@ async function loadChats() {
     chatElements.clear();
     chatCache.clear();
 
+    // нормализуем чаты с подтягиванием ников других пользователей
+    const normalizedChats = [];
     for (const apiChat of data) {
-        const chat = await normalizeChat(apiChat);  // теперь асинхронно подтягивает ник
-        chatCache.set(chat.id, chat);
+        const chat = await normalizeChat(apiChat);  // асинхронно подтягиваем ник
+        normalizedChats.push(chat);
+    }
 
+    // сортируем по времени последнего сообщения, самые новые сверху
+    normalizedChats.sort((a, b) => {
+        const timeA = a.time ? new Date(a.time).getTime() : 0;
+        const timeB = b.time ? new Date(b.time).getTime() : 0;
+        return timeB - timeA;  // новые сверху
+    });
+
+    // рендерим
+    normalizedChats.forEach(chat => {
+        chatCache.set(chat.id, chat);
         const el = ChatItem(chat, selectChat);
         chatElements.set(chat.id, el);
         chatList.appendChild(el);
-    }
+    });
 }
 
 async function sendMessage() {
@@ -223,15 +236,37 @@ async function sendMessage() {
 
     if (!response.ok) return;
 
-    // Добавляем сообщение локально
     const currentUser = JSON.parse(localStorage.getItem("user_data"));
-    chatContent.appendChild(MessageItem({
-        text: data.text_content,
-        outgoing: true
-    }));
 
+    // Создаём сообщение локально
+    const msgItem = MessageItem({
+        text: data.text_content,
+        outgoing: true,
+        time: new Date().toISOString()
+    });
+    chatContent.appendChild(msgItem);
     chatContent.scrollTop = chatContent.scrollHeight;
     messageInput.value = "";
+
+    // --- Обновляем чат в списке ---
+    const el = chatElements.get(activeChatId);
+    if (el) {
+        el.querySelector(".chat-last").textContent = data.text_content;
+        el.querySelector(".chat-time").textContent = new Date().toISOString();
+
+        // Перемещаем элемент наверх
+        chatList.prepend(el);
+
+        el.classList.add("chat-new");
+        setTimeout(() => el.classList.remove("chat-new"), 600);
+    }
+
+    // Обновляем кеш
+    const cachedChat = chatCache.get(activeChatId);
+    if (cachedChat) {
+        cachedChat.lastMessage = data.text_content;
+        cachedChat.time = new Date().toISOString();
+    }
 }
 
 async function createChat() {
