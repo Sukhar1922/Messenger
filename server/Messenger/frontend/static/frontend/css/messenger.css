@@ -77,9 +77,10 @@
 /* CHAT AREA */
 .chat-area {
     display: grid;
-    grid-template-rows: 60px 1fr auto;
+    grid-template-rows: 60px 1fr auto; /* header / content / input */
     background: rgba(255,255,255,0.2);
     border-radius: 16px;
+    min-height: 0; /* важно для корректного поведения 1fr */
 }
 
 /* HEADER */
@@ -104,6 +105,7 @@
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
+    min-height: 0; /* без этого scroll не работает в grid */
 }
 
 /* MESSAGE */
