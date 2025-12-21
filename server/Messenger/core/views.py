@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ValidationError
 
 from .models import *
 from .serializers import *
@@ -21,12 +22,32 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
 
-class ChatListView(generics.ListAPIView):
+class ChatListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ChatSerializer
 
     def get_queryset(self):
         return Chat.objects.filter(users=self.request.user).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        users = serializer.validated_data.get("users")
+
+        if not users or len(users) < 1:
+            raise ValidationError("Нужно выбрать хотя бы одного пользователя")
+
+        # добавляем текущего пользователя
+        users = list(users)
+        if self.request.user not in users:
+            users.append(self.request.user)
+
+        is_private = len(users) == 2
+
+        chat = serializer.save(
+            is_private=is_private,
+            chat_name=serializer.validated_data.get("chat_name", "private_chat")
+        )
+
+        chat.users.set(users)
 
 
 class MessageListView(generics.ListAPIView):

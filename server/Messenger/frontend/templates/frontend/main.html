@@ -12,9 +12,34 @@
 {% endblock %}
 
 {% block main %}
+<div id="createChatModal" class="modal hidden">
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-content">
+        <h2>Создать новый чат</h2>
+
+        <label>Выберите пользователей:</label>
+        <input type="text" id="userSearchInputModal" placeholder="Поиск по никнейму">
+        <div id="userSearchResultsModal" class="user-search-results scrollable"></div>
+
+        <label>Название чата:</label>
+        <input type="text" id="chatNameInputModal" placeholder="Название чата">
+
+        <label>
+            <input type="checkbox" id="isPrivateInputModal" checked>
+            Приватный чат
+        </label>
+
+        <div class="modal-buttons">
+            <button id="cancelCreateChatBtn">Отмена</button>
+            <button id="confirmCreateChatBtn">Создать</button>
+        </div>
+    </div>
+</div>
+
 <div class="messenger">
 
     <aside class="chat-sidebar">
+        <button id="newChatBtn" class="new-chat-btn">Написать</button>
         <div class="sidebar-title">Чаты</div>
         <div class="chats" id="chatList"></div>
     </aside>

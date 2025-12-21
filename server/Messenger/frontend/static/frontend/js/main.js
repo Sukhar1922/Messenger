@@ -216,6 +216,137 @@ async function sendMessage() {
     messageInput.value = "";
 }
 
+async function createChat() {
+    // получаем список пользователей
+    const { data: users } = await APIfetch("/api/users/", "GET", true);
+
+    if (!users.length) {
+        alert("Нет доступных пользователей");
+        return;
+    }
+
+    // простой выбор через prompt (потом заменишь на нормальный UI)
+    const input = prompt(
+        "Выберите пользователей (ID через запятую):\n" +
+        users.map(u => `${u.id}: ${u.nickname}`).join("\n")
+    );
+
+    if (!input) return;
+
+    const userIds = input
+        .split(",")
+        .map(id => Number(id.trim()))
+        .filter(Boolean);
+
+    if (!userIds.length) return;
+
+    let body = {
+        users: userIds,
+        chat_name: "private_chat"
+    };
+
+    // если больше одного собеседника — просим название
+    if (userIds.length > 1) {
+        const name = prompt("Введите название чата:");
+        if (!name) return;
+        body.chat_name = name;
+    }
+
+    const { data, response } = await APIfetch(
+        "/api/chats/",
+        "POST",
+        true,
+        body
+    );
+
+    if (!response.ok) {
+        console.error("Ошибка создания чата", data);
+        return;
+    }
+
+    // обновляем список и сразу открываем чат
+    await loadChats();
+    selectChat(data.id);
+}
+
+const createChatModal = document.getElementById("createChatModal");
+const modalOverlay = document.getElementById("modalOverlay");
+const cancelCreateChatBtn = document.getElementById("cancelCreateChatBtn");
+const confirmCreateChatBtn = document.getElementById("confirmCreateChatBtn");
+
+const userSearchInputModal = document.getElementById("userSearchInputModal");
+const userSearchResultsModal = document.getElementById("userSearchResultsModal");
+const chatNameInputModal = document.getElementById("chatNameInputModal");
+const isPrivateInputModal = document.getElementById("isPrivateInputModal");
+
+function openCreateChatModal() {
+    createChatModal.classList.remove("hidden");
+}
+
+function closeCreateChatModal() {
+    createChatModal.classList.add("hidden");
+    userSearchInputModal.value = "";
+    userSearchResultsModal.innerHTML = "";
+    chatNameInputModal.value = "";
+    isPrivateInputModal.checked = true;
+}
+
+// обработчики кнопок
+document.getElementById("newChatBtn").addEventListener("click", openCreateChatModal);
+modalOverlay.addEventListener("click", closeCreateChatModal);
+cancelCreateChatBtn.addEventListener("click", closeCreateChatModal);
+
+// создание чата
+confirmCreateChatBtn.addEventListener("click", async () => {
+    const selectedUserIds = Array.from(userSearchResultsModal.querySelectorAll("input[type=checkbox]:checked"))
+        .map(cb => Number(cb.value));
+
+    if (!selectedUserIds.length) {
+        alert("Выберите хотя бы одного пользователя");
+        return;
+    }
+
+    let chatName = chatNameInputModal.value.trim();
+    if (!chatName) {
+        chatName = selectedUserIds.length === 1 ? "private_chat" : "";
+    }
+
+    const body = {
+        users: selectedUserIds,
+        chat_name: chatName,
+        is_private: isPrivateInputModal.checked
+    };
+
+    const { data, response } = await APIfetch("/api/chats/", "POST", true, body);
+
+    if (!response.ok) {
+        console.error("Ошибка создания чата", data);
+        return;
+    }
+
+    closeCreateChatModal();
+    await loadChats();
+    selectChat(data.id);
+});
+
+userSearchInputModal.addEventListener("input", async () => {
+    const q = userSearchInputModal.value.trim();
+    const { data: users } = await APIfetch(`/api/user/search/?q=${encodeURIComponent(q)}`, "GET", true);
+
+    userSearchResultsModal.innerHTML = "";
+
+    users.forEach(u => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <label>
+                <input type="checkbox" value="${u.id}">
+                ${u.nickname}
+            </label>
+        `;
+        userSearchResultsModal.appendChild(div);
+    });
+});
+
 async function main() {
     const user = await loadUserData();
     if (!user) return;

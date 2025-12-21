@@ -35,11 +35,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class ChatSerializer(serializers.ModelSerializer):
-    users = serializers.StringRelatedField(many=True)
+    users = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        many=True
+    )
 
     class Meta:
         model = Chat
         fields = ['id', 'chat_name', 'is_private', 'users', 'created_at']
+        read_only_fields = ['id', 'is_private', 'created_at']
 
 
 class MessageSerializer(serializers.ModelSerializer):
