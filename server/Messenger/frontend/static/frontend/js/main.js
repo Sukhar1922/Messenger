@@ -1,9 +1,15 @@
 import { greeting_text } from "./ui/greeting_text.js";
 import { ChatItem } from "./ui/chatItem.js";
+import { MessageItem } from "./ui/messageItem.js";
 
 
-const chatElements = new Map(); // chatId -> HTMLElement
-let chatList = null;
+const chatElements = new Map();   // chatId -> HTMLElement
+const chatCache = new Map();     // chatId -> chat data
+let activeChatId = null;
+
+let chatList;
+let chatHeader;
+let chatContent;
 
 
 async function APIfetch(link, method, withAccess=false, body=null) {
@@ -96,18 +102,12 @@ function normalizeChat(apiChat) {
     };
 }
 
-async function loadChats() {
-    const { data } = await APIfetch("/api/chats/", "GET", true);
-
-    chatList.innerHTML = "";
-
-    data.forEach(apiChat => {
-        const chat = normalizeChat(apiChat);
-        const el = ChatItem(chat);
-
-        chatElements.set(chat.id, el);
-        chatList.appendChild(el);
-    });
+function normalizeMessage(apiMsg, currentUserId) {
+    return {
+        text: apiMsg.text_content,
+        outgoing: apiMsg.user === currentUserId,
+        time: apiMsg.writed_at
+    };
 }
 
 function onIncomingMessage(msg) {
@@ -137,6 +137,59 @@ function onIncomingMessage(msg) {
     setTimeout(() => el.classList.remove("chat-new"), 600);
 }
 
+async function loadMessages(chatId) {
+    const { data } = await APIfetch(
+        `/api/chats/${chatId}/messages`,
+        "GET",
+        true
+    );
+
+    chatContent.innerHTML = "";
+
+    const currentUser = JSON.parse(localStorage.getItem("user_data"));
+
+    data.forEach(apiMsg => {
+        const msg = normalizeMessage(apiMsg, currentUser.id);
+        chatContent.appendChild(MessageItem(msg));
+    });
+
+    chatContent.scrollTop = chatContent.scrollHeight;
+}
+
+async function selectChat(chatId) {
+    if (activeChatId === chatId) return;
+
+    activeChatId = chatId;
+
+    document
+        .querySelectorAll(".chat-item")
+        .forEach(el => el.classList.remove("active"));
+
+    chatElements.get(chatId)?.classList.add("active");
+
+    const chat = chatCache.get(chatId);
+    chatHeader.querySelector(".chat-title").textContent = chat.name;
+
+    await loadMessages(chatId);
+}
+
+async function loadChats() {
+    const { data } = await APIfetch("/api/chats/", "GET", true);
+
+    chatList.innerHTML = "";
+    chatElements.clear();
+    chatCache.clear();
+
+    data.forEach(apiChat => {
+        const chat = normalizeChat(apiChat);
+        chatCache.set(chat.id, chat);
+
+        const el = ChatItem(chat, selectChat);
+        chatElements.set(chat.id, el);
+        chatList.appendChild(el);
+    });
+}
+
 async function main() {
     const user = await loadUserData();
     if (!user) return;
@@ -145,6 +198,8 @@ async function main() {
     header.appendChild(greeting_text(user.nickname));
 
     chatList = document.getElementById("chatList");
+    chatHeader = document.getElementById("chatHeader");
+    chatContent = document.getElementById("chatContent");
 
     await loadChats();
 }

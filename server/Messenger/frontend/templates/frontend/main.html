@@ -20,20 +20,16 @@
     </aside>
 
     <section class="chat-area">
-        <header class="chat-header">
+        <header class="chat-header" id="chatHeader">
             <div class="chat-avatar"></div>
-            <div class="chat-title">Андрей</div>
+            <div class="chat-title">Выберите чат</div>
         </header>
 
-        <div class="chat-content">
-            <div class="message incoming">Привет</div>
-            <div class="message incoming">Как дела?</div>
-            <div class="message outgoing">Привет</div>
-        </div>
+        <div class="chat-content" id="chatContent"></div>
 
         <footer class="chat-input">
-            <textarea placeholder="Сообщение..."></textarea>
-            <button>➤</button>
+            <textarea placeholder="Сообщение..." id="messageInput"></textarea>
+            <button id="sendBtn">➤</button>
         </footer>
     </section>
 
