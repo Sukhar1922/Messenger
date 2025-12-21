@@ -1,0 +1,254 @@
+/* CONTAINER */
+.messenger {
+    width: 90%;
+    height: 90%;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 10px;
+    background: #6FA1EC;
+    border-radius: 20px;
+    padding: 10px;
+    backdrop-filter: blur(12px);
+}
+
+/* SIDEBAR */
+.chat-sidebar {
+    background: rgba(255,255,255,0.25);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.chats {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* CHAT ITEM */
+.chat-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.chat-item:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+.chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+}
+
+.chat-meta {
+    overflow: hidden;
+}
+
+.chat-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.chat-last {
+    font-size: 12px;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+/* CHAT AREA */
+.chat-area {
+    display: grid;
+    grid-template-rows: 60px 1fr auto; /* header / content / input */
+    background: rgba(255,255,255,0.2);
+    border-radius: 16px;
+    min-height: 0; /* важно для корректного поведения 1fr */
+}
+
+/* HEADER */
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 16px 16px 0 0;
+}
+
+.chat-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* CONTENT */
+.chat-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    min-height: 0; /* без этого scroll не работает в grid */
+}
+
+/* MESSAGE */
+.message {
+    max-width: 45%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 14px;
+    word-wrap: break-word;
+}
+
+.message.incoming {
+    background: white;
+    align-self: flex-start;
+    border-radius: 14px 14px 14px 4px;
+}
+
+.message.outgoing {
+    background: #679dd3;
+    color: white;
+    align-self: flex-end;
+    border-radius: 14px 14px 4px 14px;
+}
+
+/* INPUT */
+.chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 0 0 16px 16px;
+}
+
+.chat-input textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+    outline: none;
+}
+
+.chat-input button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #679dd3;
+    color: white;
+    cursor: pointer;
+}
+
+.chat-input button:hover {
+    background: #4d88c8;
+}
+
+.new-chat-btn {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.35);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.new-chat-btn:hover {
+    background: rgba(255,255,255,0.55);
+}
+
+.hidden {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* поверх всего */
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    width: 400px;
+    max-width: 90%;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-content input[type="text"] {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-buttons button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-buttons button:hover {
+    opacity: 0.85;
+}
+
+.user-search-results.scrollable {
+    max-height: 100px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 10px;
+    background: #fff;
+}
+.user-search-results.scrollable div {
+    margin-bottom: 3px;
+}
