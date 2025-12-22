@@ -19,7 +19,7 @@ class JWTAuthMiddleware:
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "websocket":
-            from django.contrib.auth.models import AnonymousUser  # ленивый импорт
+            from django.contrib.auth.models import AnonymousUser
             query_string = scope.get("query_string", b"").decode()
             query = parse_qs(query_string)
             token = query.get("token")

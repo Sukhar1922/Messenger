@@ -19,15 +19,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
 
-        # Создаем пользователя стандартно
         user = User(**validated_data)
         user.set_password(password)
         user.save()
 
-        # Генерируем JWT
         refresh = RefreshToken.for_user(user)
 
-        # Добавляем токены в сериализатор
         user.access = str(refresh.access_token)
         user.refresh = str(refresh)
 

@@ -35,7 +35,6 @@ class ChatListView(generics.ListCreateAPIView):
         if not users or len(users) < 1:
             raise ValidationError("Нужно выбрать хотя бы одного пользователя")
 
-        # добавляем текущего пользователя
         users = list(users)
         if self.request.user not in users:
             users.append(self.request.user)
