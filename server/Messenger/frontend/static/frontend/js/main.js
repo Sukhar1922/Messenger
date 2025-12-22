@@ -3,8 +3,8 @@ import { ChatItem } from "./ui/chatItem.js";
 import { MessageItem } from "./ui/messageItem.js";
 
 
-const chatElements = new Map();   // chatId -> HTMLElement
-const chatCache = new Map();     // chatId -> chat data
+const chatElements = new Map();
+const chatCache = new Map();
 let activeChatId = null;
 
 let chatList;
@@ -103,7 +103,6 @@ async function normalizeChat(apiChat) {
     // Если приватный чат и дефолтное имя
     if (apiChat.is_private && name === "private_chat") {
         const currentUser = JSON.parse(localStorage.getItem("user_data"));
-        // находим id другого пользователя
         const otherUserId = apiChat.users.find(uid => uid !== currentUser.id);
         if (otherUserId) {
             const otherUser = await getUserById(otherUserId);
@@ -150,7 +149,6 @@ function onIncomingMessage(msg) {
     el.classList.add("chat-new");
     setTimeout(() => el.classList.remove("chat-new"), 600);
 
-    // если чат открыт — добавляем сообщение в чат
     if (activeChatId === msg.chat_id) {
         const currentUser = JSON.parse(localStorage.getItem("user_data"));
         chatContent.appendChild(MessageItem({
@@ -205,21 +203,18 @@ async function loadChats() {
     chatElements.clear();
     chatCache.clear();
 
-    // нормализуем чаты с подтягиванием ников других пользователей
     const normalizedChats = [];
     for (const apiChat of data) {
-        const chat = await normalizeChat(apiChat);  // асинхронно подтягиваем ник
+        const chat = await normalizeChat(apiChat);
         normalizedChats.push(chat);
     }
 
-    // сортируем по времени последнего сообщения, самые новые сверху
     normalizedChats.sort((a, b) => {
         const timeA = a.time ? new Date(a.time).getTime() : 0;
         const timeB = b.time ? new Date(b.time).getTime() : 0;
-        return timeB - timeA;  // новые сверху
+        return timeB - timeA;
     });
 
-    // рендерим
     normalizedChats.forEach(chat => {
         chatCache.set(chat.id, chat);
         const el = ChatItem(chat, selectChat);
@@ -233,7 +228,6 @@ async function sendMessage() {
     const text = messageInput.value.trim();
     if (!text || !activeChatId) return;
 
-    // Отправляем на сервер через WS
     socket.send(JSON.stringify({
         chat_id: activeChatId,
         text
@@ -243,7 +237,6 @@ async function sendMessage() {
 }
 
 async function createChat() {
-    // получаем список пользователей
     const { data: users } = await APIfetch("/api/users/", "GET", true);
 
     if (!users.length) {
@@ -251,7 +244,6 @@ async function createChat() {
         return;
     }
 
-    // простой выбор через prompt (потом заменишь на нормальный UI)
     const input = prompt(
         "Выберите пользователей (ID через запятую):\n" +
         users.map(u => `${u.id}: ${u.nickname}`).join("\n")
@@ -271,7 +263,6 @@ async function createChat() {
         chat_name: "private_chat"
     };
 
-    // если больше одного собеседника — просим название
     if (userIds.length > 1) {
         const name = prompt("Введите название чата:");
         if (!name) return;
@@ -290,7 +281,6 @@ async function createChat() {
         return;
     }
 
-    // обновляем список и сразу открываем чат
     await loadChats();
     selectChat(data.id);
 }
@@ -317,12 +307,10 @@ function closeCreateChatModal() {
     isPrivateInputModal.checked = true;
 }
 
-// обработчики кнопок
 document.getElementById("newChatBtn").addEventListener("click", openCreateChatModal);
 modalOverlay.addEventListener("click", closeCreateChatModal);
 cancelCreateChatBtn.addEventListener("click", closeCreateChatModal);
 
-// создание чата
 confirmCreateChatBtn.addEventListener("click", async () => {
     const selectedUserIds = Array.from(userSearchResultsModal.querySelectorAll("input[type=checkbox]:checked"))
         .map(cb => Number(cb.value));
@@ -393,7 +381,6 @@ async function initSocket() {
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.message) {
-            // ожидаем, что сервер пришлет объект вида {chat_id, text, time, chat_name}
             onIncomingMessage(data.message);
         }
     };
