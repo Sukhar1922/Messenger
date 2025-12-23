@@ -97,6 +97,27 @@ async function getUserById(id) {
     return data; // объект {id, login, nickname, created_at, last_login}
 }
 
+function formatChatTime(isoString) {
+    if (!isoString) return "";
+
+    const date = new Date(isoString);
+    const now = new Date();
+
+    const isToday =
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear();
+
+    if (isToday) {
+        return date.toLocaleTimeString("ru-RU", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    return date.toLocaleDateString("ru-RU");
+}
+
 async function normalizeChat(apiChat) {
     let name = apiChat.chat_name;
 
@@ -114,7 +135,7 @@ async function normalizeChat(apiChat) {
         id: apiChat.id,
         name,
         lastMessage: apiChat.last_message || "Нет сообщений",
-        time: apiChat.last_message_time || "",
+        time: formatChatTime(apiChat.last_message_time) || "",
         isPrivate: apiChat.is_private
     };
 }
@@ -142,7 +163,7 @@ function onIncomingMessage(msg) {
         chatList.prepend(el);
     } else {
         el.querySelector(".chat-last").textContent = msg.text;
-        el.querySelector(".chat-time").textContent = msg.time;
+        el.querySelector(".chat-time").textContent = formatChatTime(msg.time);
         chatList.prepend(el);
     }
 
@@ -154,7 +175,7 @@ function onIncomingMessage(msg) {
         chatContent.appendChild(MessageItem({
             text: msg.text,
             outgoing: msg.user_id === currentUser.id,
-            time: msg.time
+            time: formatChatTime(msg.time)
         }));
         chatContent.scrollTop = chatContent.scrollHeight;
     }
