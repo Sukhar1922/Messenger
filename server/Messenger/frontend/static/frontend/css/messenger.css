@@ -39,6 +39,11 @@
     padding: 8px;
     border-radius: 12px;
     cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.chat-item.active {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .chat-item:hover {
