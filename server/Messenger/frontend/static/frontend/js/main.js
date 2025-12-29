@@ -140,11 +140,19 @@ async function normalizeChat(apiChat) {
     };
 }
 
-function normalizeMessage(apiMsg, currentUserId) {
+async function normalizeMessage(apiMsg, currentUserId) {
+    let senderNickname = "";
+
+    if (apiMsg.user !== currentUserId) {
+        const user = await getUserById(apiMsg.user);
+        senderNickname = user.nickname;
+    }
+
     return {
         text: apiMsg.text_content,
         outgoing: apiMsg.user === currentUserId,
-        time: apiMsg.writed_at
+        sender: senderNickname,
+        time: formatChatTime(apiMsg.writed_at)
     };
 }
 
@@ -175,6 +183,7 @@ function onIncomingMessage(msg) {
         chatContent.appendChild(MessageItem({
             text: msg.text,
             outgoing: msg.user_id === currentUser.id,
+            sender: msg.user_nickname,
             time: formatChatTime(msg.time)
         }));
         chatContent.scrollTop = chatContent.scrollHeight;
@@ -192,10 +201,10 @@ async function loadMessages(chatId) {
 
     const currentUser = JSON.parse(localStorage.getItem("user_data"));
 
-    data.forEach(apiMsg => {
-        const msg = normalizeMessage(apiMsg, currentUser.id);
+    for (const apiMsg of data) {
+        const msg = await normalizeMessage(apiMsg, currentUser.id);
         chatContent.appendChild(MessageItem(msg));
-    });
+    }
 
     chatContent.scrollTop = chatContent.scrollHeight;
 }
