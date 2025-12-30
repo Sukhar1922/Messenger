@@ -267,9 +267,13 @@ async function sendMessage() {
 }
 
 async function createChat() {
+    const currentUser = JSON.parse(localStorage.getItem("user_data"));
+
     const { data: users } = await APIfetch("/api/users/", "GET", true);
 
-    if (!users.length) {
+    const filteredUsers = users.filter(u => u.id !== currentUser.id);
+
+    if (!filteredUsers.length) {
         alert("Нет доступных пользователей");
         return;
     }
@@ -325,8 +329,26 @@ const userSearchResultsModal = document.getElementById("userSearchResultsModal")
 const chatNameInputModal = document.getElementById("chatNameInputModal");
 const isPrivateInputModal = document.getElementById("isPrivateInputModal");
 
-function openCreateChatModal() {
+async function openCreateChatModal() {
     createChatModal.classList.remove("hidden");
+
+    const currentUser = JSON.parse(localStorage.getItem("user_data"));
+    const { data: users } = await APIfetch("/api/users/", "GET", true);
+
+    userSearchResultsModal.innerHTML = "";
+
+    users
+        .filter(u => u.id !== currentUser.id)
+        .forEach(u => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+                <label>
+                    <input type="checkbox" value="${u.id}">
+                    ${u.nickname}
+                </label>
+            `;
+            userSearchResultsModal.appendChild(div);
+        });
 }
 
 function closeCreateChatModal() {
@@ -379,16 +401,20 @@ userSearchInputModal.addEventListener("input", async () => {
 
     userSearchResultsModal.innerHTML = "";
 
-    users.forEach(u => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-            <label>
-                <input type="checkbox" value="${u.id}">
-                ${u.nickname}
-            </label>
-        `;
-        userSearchResultsModal.appendChild(div);
-    });
+    const currentUser = JSON.parse(localStorage.getItem("user_data"));
+
+    users
+        .filter(u => u.id !== currentUser.id)
+        .forEach(u => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+                <label>
+                    <input type="checkbox" value="${u.id}">
+                    ${u.nickname}
+                </label>
+            `;
+            userSearchResultsModal.appendChild(div);
+        });
 });
 
 let socket;
