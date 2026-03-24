@@ -28,7 +28,7 @@ form.addEventListener("submit", async (e) => {
 
         if (!response.ok) {
             const err = await response.json();
-            throw new Error(err.detail || "Ошибка ркгистрации");
+            throw new Error(err.detail || "Ошибка регистрации");
         }
 
         const data = await response.json();

@@ -17,9 +17,19 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
+
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
     serializer_class = RegisterSerializer
+    queryset = User.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({
+            'access': user.access,
+            'refresh': user.refresh,
+        }, status=status.HTTP_200_OK)
 
 
 class ChatListView(generics.ListCreateAPIView):
