@@ -55,7 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "chat_id": chat.id,
                         "chat_name": chat.chat_name,
                         "user_id": user.id,
-                        "text": msg.text_content,
+                        "text": msg.decrypted_text,
                         "time": msg.writed_at.isoformat()
                     }
                 }

@@ -65,7 +65,7 @@ class ChatSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj):
         msg = obj.message_set.order_by('-writed_at').first()
-        return msg.text_content if msg else "Нет сообщений"
+        return msg.decrypted_text if msg else "Нет сообщений"
 
     def get_last_message_time(self, obj):
         msg = obj.message_set.order_by('-writed_at').first()
@@ -73,14 +73,16 @@ class ChatSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    text_content = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
         fields = [
-            'id', 
-            'chat', 
-            'user', 
-            'text_content', 
-            'writed_at', 
+            'id',
+            'chat',
+            'user',
+            'text_content',
+            'writed_at',
             'is_read'
         ]
         read_only_fields = [
@@ -90,6 +92,9 @@ class MessageSerializer(serializers.ModelSerializer):
             "writed_at",
             "is_read",
         ]
+
+    def get_text_content(self, obj):
+        return obj.decrypted_text
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()

@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
+FERNET_KEY = config('FERNET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

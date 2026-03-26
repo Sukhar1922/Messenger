@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils import timezone
 
+from .crypto import decrypt, encrypt
+
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -71,6 +73,14 @@ class Message(models.Model):
     text_content = models.TextField()
     writed_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        self.text_content = encrypt(self.text_content)
+        super().save(*args, **kwargs)
+
+    @property
+    def decrypted_text(self):
+        return decrypt(self.text_content)
 
     def __str__(self):
         return f'Сообщение от {self.user.nickname}'
