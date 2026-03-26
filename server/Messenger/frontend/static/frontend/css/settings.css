@@ -1,0 +1,96 @@
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+    padding: 24px;
+}
+
+.settings-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.settings-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3a3a3a;
+}
+
+.settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.settings-field label {
+    font-size: 13px;
+    color: #7a8fa6;
+}
+
+.settings-field input,
+.settings-card input[type="password"] {
+    border: 1px solid #d8e3ef;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.settings-field input:focus,
+.settings-card input:focus {
+    border-color: #6FA1EC;
+}
+
+.settings-row {
+    display: flex;
+    gap: 10px;
+}
+
+.settings-row input {
+    flex: 1;
+}
+
+.settings-btn {
+    height: 40px;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 0 18px;
+    background: #6FA1EC;
+    white-space: nowrap;
+}
+
+.settings-msg {
+    font-size: 13px;
+    color: #5a9e6f;
+    min-height: 16px;
+}
+
+.settings-msg.error {
+    color: #c0392b;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    background: #e8f0fb;
+    color: #6FA1EC;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: #d0e2f8;
+}

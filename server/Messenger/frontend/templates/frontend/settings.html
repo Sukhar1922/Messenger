@@ -2,3 +2,49 @@
 {% load static %}
 
 {% block title %}Настройки{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'frontend/css/settings.css' %}">
+{% endblock %}
+
+{% block main %}
+<div class="settings-container">
+
+    <section class="settings-card">
+        <h2 class="settings-title">Профиль</h2>
+
+        <div class="settings-field">
+            <label>Псевдоним</label>
+            <div class="settings-row">
+                <input type="text" id="nicknameInput" placeholder="Псевдоним">
+                <button class="glass-button settings-btn" id="saveNicknameBtn">Сохранить</button>
+            </div>
+            <span class="settings-msg" id="nicknameMsg"></span>
+        </div>
+    </section>
+
+    <section class="settings-card">
+        <h2 class="settings-title">Безопасность</h2>
+
+        <div class="settings-field">
+            <label>Текущий пароль</label>
+            <input type="password" id="oldPasswordInput" placeholder="••••••••">
+        </div>
+        <div class="settings-field">
+            <label>Новый пароль</label>
+            <input type="password" id="newPasswordInput" placeholder="••••••••">
+        </div>
+        <button class="glass-button settings-btn" id="savePasswordBtn">Сменить пароль</button>
+        <span class="settings-msg" id="passwordMsg"></span>
+    </section>
+
+    <section class="settings-card">
+        <button class="logout-btn" id="logoutBtn">Выйти</button>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module" src="{% static 'frontend/js/settings.js' %}"></script>
+{% endblock %}

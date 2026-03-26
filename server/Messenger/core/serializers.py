@@ -95,3 +95,28 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'login', 'nickname', 'created_at', 'last_login']
+
+
+class ChangeNicknameSerializer(serializers.Serializer):
+    nickname = serializers.CharField(max_length=64)
+
+    def update(self, instance, validated_data):
+        instance.nickname = validated_data['nickname']
+        instance.save()
+        return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError('Неверный текущий пароль.')
+        return value
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        return instance

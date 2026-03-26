@@ -16,5 +16,7 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='user_list'),
     path('user/search/', UserSearchView.as_view(), name='user_search'),
     path('user/<int:pk>/', UserView.as_view(), name='user'),
-    path('user/me/', MeView.as_view(), name='user_me'),  
+    path('user/me/', MeView.as_view(), name='user_me'),
+    path('user/me/nickname/', ChangeNicknameView.as_view(), name='change_nickname'),
+    path('user/me/password/', ChangePasswordView.as_view(), name='change_password'), 
 ]
