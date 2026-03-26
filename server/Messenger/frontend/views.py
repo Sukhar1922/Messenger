@@ -20,3 +20,7 @@ def register_view(request):
 
 def main_view(request):
     return render(request, 'frontend/main.html')
+
+
+def settings_view(request):
+    return render(request, 'frontend/settings.html')

@@ -15,7 +15,6 @@
         <div class="header-left">
             <div class="burger" onclick="toggleMenu()">
                 {% block headerLeftMenu %}{% endblock %}
-                <!-- <div></div><div></div><div></div> -->
             </div>
             <div class="header-title">Мессенджер</div>
         </div>
@@ -25,9 +24,15 @@
         </div>
     </header>
 
-    <main>
-        {% block main %}{% endblock %}
-    </main>
+    <div class="layout">
+        <nav class="sidebar">
+            {% block sidebar %}{% endblock %}
+        </nav>
+
+        <main>
+            {% block main %}{% endblock %}
+        </main>
+    </div>
 
     {% block extra_scripts %}{% endblock %}
 </body>
