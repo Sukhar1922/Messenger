@@ -1,31 +1,4 @@
-async function APIfetch(link, method, withAccess = false, body = null) {
-    const headers = {};
-
-    if (withAccess) {
-        const access = localStorage.getItem("access");
-        headers["Authorization"] = "Bearer " + access;
-    }
-
-    if (body && method !== "GET") {
-        headers["Content-Type"] = "application/json";
-    }
-
-    const response = await fetch(link, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : null
-    });
-
-    const data = await response.json();
-    return { response, data };
-}
-
-function logout() {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    localStorage.removeItem("user_data");
-    window.location.href = '/login/';
-}
+import { APIfetch, logout } from "./api.js";
 
 // UI элементы
 const nicknameInput = document.getElementById('nicknameInput');

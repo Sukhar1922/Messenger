@@ -1,3 +1,4 @@
+import { APIfetch, redirectToLogin, logout, refreshAccessToken } from "./api.js";
 import { greeting_text } from "./ui/greeting_text.js";
 import { ChatItem } from "./ui/chatItem.js";
 import { MessageItem } from "./ui/messageItem.js";
@@ -10,29 +11,6 @@ let activeChatId = null;
 let chatList;
 let chatHeader;
 let chatContent;
-
-
-async function APIfetch(link, method, withAccess=false, body=null) {
-    const headers = {};
-
-    if (withAccess) {
-        const access = localStorage.getItem("access");
-        headers["Authorization"] = "Bearer " + access;
-    }
-
-    if (body && method !== "GET") {
-        headers["Content-Type"] = "application/json";
-    }
-
-    const response = await fetch(link, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : null
-    });
-
-    const data = await response.json();
-    return { response, data };
-}
 
 
 async function loadUserData() {
@@ -55,42 +33,6 @@ async function loadUserData() {
     return data;
 }
 
-
-async function refreshAccessToken() {
-    const refresh = localStorage.getItem("refresh");
-    if (!refresh) {
-        logout();
-        return false;
-    }
-
-    const { response, data } = await APIfetch(
-        "/api/token/refresh/",
-        "POST",
-        false,
-        { refresh }
-    );
-
-    if (!response.ok || !data.access) {
-        logout();
-        return false;
-    }
-
-    localStorage.setItem("access", data.access);
-    return true;
-}
-
-
-function redirectToLogin() {
-    window.location.href = '/login/';
-};
-
-
-function logout() {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    localStorage.removeItem("user_data");
-    redirectToLogin();
-}
 
 async function getUserById(id) {
     const { data } = await APIfetch(`/api/user/${id}/`, "GET", true);
