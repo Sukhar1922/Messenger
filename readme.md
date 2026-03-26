@@ -17,6 +17,8 @@
     - source venv/bin/activate
     - pip install -r requirements.txt
     - cd Messenger
+    - python3 gen_fernet.py (Скопировать ключ)
+    - nano ../.env (Вставить ключ в FERNET_KEY)
     - python3 manage.py migrate
     - python3 manage.py createsuperuser
 
