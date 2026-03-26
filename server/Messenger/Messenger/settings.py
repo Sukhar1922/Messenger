@@ -30,6 +30,8 @@ FERNET_KEY = config('FERNET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+IS_OPEN_REGISTRATION = config('IS_OPEN_REGISTRATION', cast=bool)
+
 ALLOWED_HOSTS = ['*']
 
 

@@ -3,6 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import *
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 
 User = get_user_model()
@@ -13,12 +14,20 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
+    IS_OPEN_REG = settings.IS_OPEN_REGISTRATION
 
     def validate(self, data):
+        print(self.IS_OPEN_REG)
+        if self.IS_OPEN_REG:
+            print('==========')
+            data['user'] = User.objects.create_user(login=data['login'])
+            return data
+
         login = data.get('login')
         try:
             user = User.objects.get(login=login)
         except User.DoesNotExist:
+            print('Пользователь с таким логином не найден. Обратитесь к администратору.')
             raise serializers.ValidationError({'login': 'Пользователь с таким логином не найден. Обратитесь к администратору.'})
 
         if user.is_registered:
