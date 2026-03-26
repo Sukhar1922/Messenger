@@ -94,3 +94,33 @@
 .logout-btn:hover {
     background: #d0e2f8;
 }
+
+.avatar-preview-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #e8f0fb;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.avatar-upload-label {
+    cursor: pointer;
+    color: #6FA1EC;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #6FA1EC;
+    transition: background 0.2s;
+}
+
+.avatar-upload-label:hover {
+    background: #e8f0fb;
+}

@@ -29,6 +29,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     login = models.CharField(max_length=32, unique=True)
     nickname = models.CharField(max_length=64)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     last_login = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 

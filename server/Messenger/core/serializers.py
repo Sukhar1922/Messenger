@@ -92,9 +92,17 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
 
 class UserSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'login', 'nickname', 'created_at', 'last_login']
+        fields = ['id', 'login', 'nickname', 'created_at', 'last_login', 'avatar_url']
+
+    def get_avatar_url(self, obj):
+        request = self.context.get('request')
+        if obj.avatar and request:
+            return request.build_absolute_uri(obj.avatar.url)
+        return None
 
 
 class ChangeNicknameSerializer(serializers.Serializer):
@@ -120,3 +128,21 @@ class ChangePasswordSerializer(serializers.Serializer):
         instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['avatar']
+
+    def validate_avatar(self, value):
+        allowed_types = ['image/jpeg', 'image/png', 'image/webp']
+        max_size = 5 * 1024 * 1024  # 5 МБ
+
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError('Допустимые форматы: JPEG, PNG, WEBP.')
+
+        if value.size > max_size:
+            raise serializers.ValidationError('Файл не должен превышать 5 МБ.')
+
+        return value

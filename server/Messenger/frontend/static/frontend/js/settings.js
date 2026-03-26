@@ -1,5 +1,7 @@
 import { APIfetch, logout } from "./api.js";
 
+
+
 // UI элементы
 const nicknameInput = document.getElementById('nicknameInput');
 const saveNicknameBtn = document.getElementById('saveNicknameBtn');
@@ -10,7 +12,20 @@ const newPasswordInput = document.getElementById('newPasswordInput');
 const savePasswordBtn = document.getElementById('savePasswordBtn');
 const passwordMsg = document.getElementById('passwordMsg');
 
+const avatarInput = document.getElementById('avatarInput');
+const avatarPreview = document.getElementById('avatarPreview');
+const saveAvatarBtn = document.getElementById('saveAvatarBtn');
+const avatarMsg = document.getElementById('avatarMsg');
+
 const logoutBtn = document.getElementById('logoutBtn');
+
+avatarInput.addEventListener('change', () => {
+    const file = avatarInput.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    avatarPreview.style.backgroundImage = `url(${url})`;
+});
 
 function showMsg(el, text, isError = false) {
     el.textContent = text;
@@ -20,8 +35,32 @@ function showMsg(el, text, isError = false) {
 
 async function loadMe() {
     const { data } = await APIfetch('/api/user/me/', 'GET', true);
-    if (data) nicknameInput.value = data.nickname;
+    if (!data) return;
+
+    nicknameInput.value = data.nickname;
+
+    if (data.avatar_url) {
+        avatarPreview.style.backgroundImage = `url(${data.avatar_url})`;
+    }
 }
+
+saveAvatarBtn.addEventListener('click', async () => {
+    const file = avatarInput.files[0];
+    if (!file) return showMsg(avatarMsg, 'Выберите файл.', true);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const access = localStorage.getItem('access');
+    const response = await fetch('/api/user/me/avatar/', {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + access },
+        body: formData
+    });
+
+    if (response.ok) showMsg(avatarMsg, 'Аватарка обновлена.');
+    else showMsg(avatarMsg, 'Ошибка. Проверьте формат и размер файла.', true);
+});
 
 saveNicknameBtn.addEventListener('click', async () => {
     const nickname = nicknameInput.value.trim();

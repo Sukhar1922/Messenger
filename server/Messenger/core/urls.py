@@ -18,5 +18,6 @@ urlpatterns = [
     path('user/<int:pk>/', UserView.as_view(), name='user'),
     path('user/me/', MeView.as_view(), name='user_me'),
     path('user/me/nickname/', ChangeNicknameView.as_view(), name='change_nickname'),
-    path('user/me/password/', ChangePasswordView.as_view(), name='change_password'), 
+    path('user/me/password/', ChangePasswordView.as_view(), name='change_password'),
+    path('user/me/avatar/', AvatarUpdateView.as_view(), name='change_avatar'), 
 ]

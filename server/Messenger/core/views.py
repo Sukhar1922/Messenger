@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import parsers
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.exceptions import ValidationError
@@ -160,3 +161,31 @@ class ChangePasswordView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'detail': 'Пароль изменён.'})
+    
+
+@extend_schema(
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'avatar': {
+                    'type': 'string',
+                    'format': 'binary'
+                }
+            }
+        }
+    }
+)
+class AvatarUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AvatarSerializer
+    parser_classes = [parsers.MultiPartParser]
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'avatar': request.build_absolute_uri(self.request.user.avatar.url)})
