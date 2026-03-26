@@ -1,9 +1,13 @@
 import { h } from "./h.js";
 
 export function ChatItem(chat, onClick) {
+    const avatarStyle = chat.avatarUrl
+        ? `style="background-image: url('${chat.avatarUrl}'); background-size: cover; background-position: center;"`
+        : '';
+
     const el = h(`
         <div class="chat-item" data-chat-id="${chat.id}">
-            <div class="chat-avatar"></div>
+            <div class="chat-avatar" ${avatarStyle}></div>
 
             <div class="chat-meta">
                 <div class="chat-name">${chat.name}</div>
@@ -13,7 +17,7 @@ export function ChatItem(chat, onClick) {
             <div class="chat-time">${chat.time}</div>
         </div>
     `);
-    
+
     el.addEventListener("click", () => onClick(chat.id));
 
     return el;

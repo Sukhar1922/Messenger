@@ -62,20 +62,22 @@ function formatChatTime(isoString) {
 
 async function normalizeChat(apiChat) {
     let name = apiChat.chat_name;
+    let avatarUrl = null;
 
-    // Если приватный чат и дефолтное имя
     if (apiChat.is_private && name === "private_chat") {
         const currentUser = JSON.parse(localStorage.getItem("user_data"));
         const otherUserId = apiChat.users.find(uid => uid !== currentUser.id);
         if (otherUserId) {
             const otherUser = await getUserById(otherUserId);
             name = otherUser.nickname;
+            avatarUrl = otherUser.avatar_url || null;
         }
     }
 
     return {
         id: apiChat.id,
         name,
+        avatarUrl,
         lastMessage: apiChat.last_message || "Нет сообщений",
         time: formatChatTime(apiChat.last_message_time) || "",
         isPrivate: apiChat.is_private
@@ -164,6 +166,15 @@ async function selectChat(chatId) {
 
     const chat = chatCache.get(chatId);
     chatHeader.querySelector(".chat-title").textContent = chat.name;
+
+    const headerAvatar = chatHeader.querySelector(".chat-avatar");
+    if (chat.avatarUrl) {
+        headerAvatar.style.backgroundImage = `url('${chat.avatarUrl}')`;
+        headerAvatar.style.backgroundSize = 'cover';
+        headerAvatar.style.backgroundPosition = 'center';
+    } else {
+        headerAvatar.style.backgroundImage = '';
+    }
 
     await loadMessages(chatId);
 }
