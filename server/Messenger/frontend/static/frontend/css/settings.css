@@ -124,3 +124,9 @@
 .avatar-upload-label:hover {
     background: #e8f0fb;
 }
+
+main {
+    height: 100%;
+    align-items: flex-start;
+    overflow-y: auto;
+}
