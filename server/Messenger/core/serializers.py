@@ -5,6 +5,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
+import nh3
+
 
 User = get_user_model()
 
@@ -83,7 +85,10 @@ class ChatSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     text_content = serializers.SerializerMethodField()
-
+    
+    def validate_text_content(self, value):
+        return nh3.clean(value, tags=set())
+    
     class Meta:
         model = Message
         fields = [

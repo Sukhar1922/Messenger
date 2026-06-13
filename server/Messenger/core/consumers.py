@@ -1,6 +1,8 @@
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+import nh3
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -29,6 +31,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         chat_id = data.get("chat_id")
         message_text = data.get("text")
+
+        message_text = nh3.clean(message_text, tags={"b", "i", "em", "strong"})
+
+        if not message_text.strip():
+            return
 
         # Ленивый импорт модели пользователя внутри метода
         from django.contrib.auth import get_user_model
