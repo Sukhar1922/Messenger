@@ -1,16 +1,30 @@
-import { h } from "./h.js";
-
 export function MessageItem({
     text = "",
     outgoing = false,
     sender = "",
     time = ""
 }) {
-    return h(`
-        <div class="message ${outgoing ? "outgoing" : "incoming"}">
-            ${!outgoing && sender ? `<div class="message-sender">${sender}</div>` : ""}
-            <div class="message-text">${text}</div>
-            ${time ? `<div class="message-time">${time}</div>` : ""}
-        </div>
-    `);
+    const el = document.createElement("div");
+    el.className = `message ${outgoing ? "outgoing" : "incoming"}`;
+
+    if (!outgoing && sender) {
+        const senderEl = document.createElement("div");
+        senderEl.className = "message-sender";
+        senderEl.textContent = sender;
+        el.appendChild(senderEl);
+    }
+
+    const textEl = document.createElement("div");
+    textEl.className = "message-text";
+    textEl.textContent = text;
+    el.appendChild(textEl);
+
+    if (time) {
+        const timeEl = document.createElement("div");
+        timeEl.className = "message-time";
+        timeEl.textContent = time;
+        el.appendChild(timeEl);
+    }
+
+    return el;
 }

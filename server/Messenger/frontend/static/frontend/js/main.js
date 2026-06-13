@@ -169,7 +169,12 @@ async function selectChat(chatId) {
 
     const headerAvatar = chatHeader.querySelector(".chat-avatar");
     if (chat.avatarUrl) {
-        headerAvatar.style.backgroundImage = `url('${chat.avatarUrl}')`;
+        if (chat.avatarUrl) {
+            const url = new URL(chat.avatarUrl, location.origin);
+            if (url.protocol === "https:" || url.protocol === "http:") {
+                headerAvatar.style.backgroundImage = `url('${CSS.escape(url.href)}')`;
+            }
+        }
         headerAvatar.style.backgroundSize = 'cover';
         headerAvatar.style.backgroundPosition = 'center';
     } else {
@@ -290,18 +295,17 @@ async function openCreateChatModal() {
 
     userSearchResultsModal.innerHTML = "";
 
-    users
-        .filter(u => u.id !== currentUser.id)
-        .forEach(u => {
-            const div = document.createElement("div");
-            div.innerHTML = `
-                <label>
-                    <input type="checkbox" value="${u.id}">
-                    ${u.nickname}
-                </label>
-            `;
-            userSearchResultsModal.appendChild(div);
-        });
+    users.filter(u => u.id !== currentUser.id).forEach(u => {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = u.id;
+    label.appendChild(checkbox);
+    label.append(` ${u.nickname}`);
+    const div = document.createElement("div");
+    div.appendChild(label);
+    userSearchResultsModal.appendChild(div);
+});
 }
 
 function closeCreateChatModal() {

@@ -1,23 +1,39 @@
 import { h } from "./h.js";
 
 export function ChatItem(chat, onClick) {
-    const avatarStyle = chat.avatarUrl
-        ? `style="background-image: url('${chat.avatarUrl}'); background-size: cover; background-position: center;"`
-        : '';
+    const el = document.createElement("div");
+    el.className = "chat-item";
+    el.dataset.chatId = chat.id; // безопасно через dataset
 
-    const el = h(`
-        <div class="chat-item" data-chat-id="${chat.id}">
-            <div class="chat-avatar" ${avatarStyle}></div>
+    const avatar = document.createElement("div");
+    avatar.className = "chat-avatar";
+    if (chat.avatarUrl) {
+        const url = new URL(chat.avatarUrl, location.origin);
+        if (url.protocol === "http:" || url.protocol === "https:") {
+            avatar.style.backgroundImage = `url('${CSS.escape(url.href)}')`;
+            avatar.style.backgroundSize = "cover";
+            avatar.style.backgroundPosition = "center";
+        }
+    }
 
-            <div class="chat-meta">
-                <div class="chat-name">${chat.name}</div>
-                <div class="chat-last">${chat.lastMessage}</div>
-            </div>
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
 
-            <div class="chat-time">${chat.time}</div>
-        </div>
-    `);
+    const name = document.createElement("div");
+    name.className = "chat-name";
+    name.textContent = chat.name; // textContent — безопасно
 
+    const last = document.createElement("div");
+    last.className = "chat-last";
+    last.textContent = chat.lastMessage; // textContent — безопасно
+
+    meta.append(name, last);
+
+    const time = document.createElement("div");
+    time.className = "chat-time";
+    time.textContent = chat.time;
+
+    el.append(avatar, meta, time);
     el.addEventListener("click", () => onClick(chat.id));
 
     return el;
