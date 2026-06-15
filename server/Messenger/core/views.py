@@ -223,3 +223,13 @@ class MediaFileView(generics.RetrieveAPIView):
 
         return FileResponse(media.file.open('rb'))
     
+
+class MessageDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MessageSerializer
+
+    def get_object(self):
+        msg = get_object_or_404(Message, id=self.kwargs['message_id'])
+        if not msg.chat.users.filter(id=self.request.user.id).exists():
+            raise PermissionDenied()
+        return msg

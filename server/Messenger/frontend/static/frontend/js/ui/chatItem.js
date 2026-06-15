@@ -25,7 +25,7 @@ export function ChatItem(chat, onClick) {
 
     const last = document.createElement("div");
     last.className = "chat-last";
-    last.textContent = chat.lastMessage; // textContent — безопасно
+    last.textContent = chat.lastMessage || "Нет сообщений";
 
     meta.append(name, last);
 

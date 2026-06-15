@@ -76,7 +76,12 @@ class ChatSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj):
         msg = obj.message_set.order_by('-writed_at').first()
-        return msg.decrypted_text if msg else "Нет сообщений"
+        if not msg:
+            return "Нет сообщений"
+        if msg.decrypted_text:
+            return msg.decrypted_text
+        count = msg.media.count()
+        return f"Файл" if count == 1 else f"Файлы"
 
     def get_last_message_time(self, obj):
         msg = obj.message_set.order_by('-writed_at').first()

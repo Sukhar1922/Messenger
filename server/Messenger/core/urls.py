@@ -21,5 +21,6 @@ urlpatterns = [
     path('user/me/password/', ChangePasswordView.as_view(), name='change_password'),
     path('user/me/avatar/', AvatarUpdateView.as_view(), name='change_avatar'),
     path('messages/<int:message_id>/media/', MediaUploadView.as_view(), name='media_upload'),
+    path('messages/<int:message_id>/', MessageDetailView.as_view(), name='message_detail'),
     path('media/<int:media_id>/', MediaFileView.as_view(), name='media_file'), 
 ]

@@ -84,6 +84,15 @@ async function normalizeChat(apiChat) {
     };
 }
 
+async function loadMediaUrl(id) {
+    const access = localStorage.getItem("access");
+    const response = await fetch(`/api/media/${id}/`, {
+        headers: { "Authorization": "Bearer " + access }
+    });
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
 async function normalizeMessage(apiMsg, currentUserId) {
     let senderNickname = "";
     if (apiMsg.user !== currentUserId) {
@@ -91,30 +100,38 @@ async function normalizeMessage(apiMsg, currentUserId) {
         senderNickname = user.nickname;
     }
 
+    const media = await Promise.all(
+        (apiMsg.media || []).map(async (m) => ({
+            ...m,
+            blobUrl: await loadMediaUrl(m.id)
+        }))
+    );
+
     return {
         text: apiMsg.text_content,
         outgoing: apiMsg.user === currentUserId,
         sender: senderNickname,
         time: formatChatTime(apiMsg.writed_at),
-        media: apiMsg.media || []
+        media
     };
 }
 
 function onIncomingMessage(msg) {
     let el = chatElements.get(msg.chat_id);
+    const previewText = msg.text || "📎 Файл";
 
     if (!el) {
         const chat = {
             id: msg.chat_id,
             name: msg.chat_name,
-            lastMessage: msg.text,
+            lastMessage: previewText,
             time: msg.time
         };
-        el = ChatItem(chat);
+        el = ChatItem(chat, selectChat);
         chatElements.set(chat.id, el);
         chatList.prepend(el);
     } else {
-        el.querySelector(".chat-last").textContent = msg.text;
+        el.querySelector(".chat-last").textContent = previewText;
         el.querySelector(".chat-time").textContent = formatChatTime(msg.time);
         chatList.prepend(el);
     }
@@ -123,14 +140,22 @@ function onIncomingMessage(msg) {
     setTimeout(() => el.classList.remove("chat-new"), 600);
 
     if (activeChatId === msg.chat_id) {
-        const currentUser = JSON.parse(localStorage.getItem("user_data"));
-        chatContent.appendChild(MessageItem({
-            text: msg.text,
-            outgoing: msg.user_id === currentUser.id,
-            sender: msg.user_nickname,
-            time: formatChatTime(msg.time)
-        }));
-        chatContent.scrollTop = chatContent.scrollHeight;
+        if (msg.has_media) {
+            const currentUser = JSON.parse(localStorage.getItem("user_data"));
+            if (msg.user_id !== currentUser.id) {
+                loadMessages(activeChatId);
+            }
+        } else {
+            const currentUser = JSON.parse(localStorage.getItem("user_data"));
+            chatContent.appendChild(MessageItem({
+                text: msg.text,
+                outgoing: msg.user_id === currentUser.id,
+                sender: msg.user_nickname,
+                time: formatChatTime(msg.time),
+                media: []
+            }));
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
     }
 }
 
@@ -481,8 +506,24 @@ async function sendMessage() {
             if (!fr.ok) console.error("Ошибка загрузки файла", file.name);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await loadMessages(activeChatId);
+        const { data: fullMsg } = await APIfetch(
+            `/api/messages/${data.id}/`,
+            "GET",
+            true
+        );
+
+        socket.send(JSON.stringify({
+            action: "file_message",
+            chat_id: activeChatId,
+            message_id: data.id,
+            preview_text: text || "📎 Файл",
+            time: fullMsg.writed_at
+        }));
+
+        const currentUser = JSON.parse(localStorage.getItem("user_data"));
+        const normalized = await normalizeMessage(fullMsg, currentUser.id);
+        chatContent.appendChild(MessageItem(normalized));
+        chatContent.scrollTop = chatContent.scrollHeight;
     }
 
     messageInput.value = "";
