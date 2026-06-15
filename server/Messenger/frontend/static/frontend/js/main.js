@@ -86,7 +86,6 @@ async function normalizeChat(apiChat) {
 
 async function normalizeMessage(apiMsg, currentUserId) {
     let senderNickname = "";
-
     if (apiMsg.user !== currentUserId) {
         const user = await getUserById(apiMsg.user);
         senderNickname = user.nickname;
@@ -96,7 +95,8 @@ async function normalizeMessage(apiMsg, currentUserId) {
         text: apiMsg.text_content,
         outgoing: apiMsg.user === currentUserId,
         sender: senderNickname,
-        time: formatChatTime(apiMsg.writed_at)
+        time: formatChatTime(apiMsg.writed_at),
+        media: apiMsg.media || []
     };
 }
 
@@ -209,19 +209,6 @@ async function loadChats() {
         chatElements.set(chat.id, el);
         chatList.appendChild(el);
     });
-}
-
-async function sendMessage() {
-    const messageInput = document.getElementById("messageInput");
-    const text = messageInput.value.trim();
-    if (!text || !activeChatId) return;
-
-    socket.send(JSON.stringify({
-        chat_id: activeChatId,
-        text
-    }));
-
-    messageInput.value = "";
 }
 
 async function createChat() {
@@ -357,21 +344,19 @@ userSearchInputModal.addEventListener("input", async () => {
     const { data: users } = await APIfetch(`/api/user/search/?q=${encodeURIComponent(q)}`, "GET", true);
 
     userSearchResultsModal.innerHTML = "";
-
     const currentUser = JSON.parse(localStorage.getItem("user_data"));
 
-    users
-        .filter(u => u.id !== currentUser.id)
-        .forEach(u => {
-            const div = document.createElement("div");
-            div.innerHTML = `
-                <label>
-                    <input type="checkbox" value="${u.id}">
-                    ${u.nickname}
-                </label>
-            `;
-            userSearchResultsModal.appendChild(div);
-        });
+    users.filter(u => u.id !== currentUser.id).forEach(u => {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = u.id;
+        label.appendChild(checkbox);
+        label.append(` ${u.nickname}`);
+        const div = document.createElement("div");
+        div.appendChild(label);
+        userSearchResultsModal.appendChild(div);
+    });
 });
 
 let socket;
@@ -422,5 +407,94 @@ async function main() {
     await loadChats();
     await initSocket();
 }
+
+const fileInput = document.getElementById("fileInput");
+const filePreview = document.getElementById("filePreview");
+let attachedFiles = [];
+
+fileInput.addEventListener("change", () => {
+    attachedFiles = [...attachedFiles, ...Array.from(fileInput.files)];
+    fileInput.value = "";
+    renderFilePreview();
+});
+
+function renderFilePreview() {
+    filePreview.innerHTML = "";
+
+    if (attachedFiles.length === 0) {
+        filePreview.classList.add("hidden");
+        return;
+    }
+
+    filePreview.classList.remove("hidden");
+    attachedFiles.forEach((file, i) => {
+        const chip = document.createElement("div");
+        chip.className = "file-chip";
+
+        const name = document.createElement("span");
+        name.textContent = file.name;
+
+        const remove = document.createElement("button");
+        remove.textContent = "✕";
+        remove.addEventListener("click", () => {
+            attachedFiles.splice(i, 1);
+            renderFilePreview();
+        });
+
+        chip.append(name, remove);
+        filePreview.appendChild(chip);
+    });
+}
+
+// --- отправка ---
+async function sendMessage() {
+    const messageInput = document.getElementById("messageInput");
+    const text = messageInput.value.trim();
+
+    if (!text && attachedFiles.length === 0) return;
+    if (!activeChatId) return;
+
+    if (attachedFiles.length === 0) {
+        socket.send(JSON.stringify({ chat_id: activeChatId, text }));
+    } else {
+        const { data, response } = await APIfetch(
+            `/api/chats/${activeChatId}/messages/`,
+            "POST",
+            true,
+            { text: text || "" }
+        );
+
+        if (!response.ok) {
+            console.error("Ошибка отправки сообщения", data);
+            return;
+        }
+
+        for (const file of attachedFiles) {
+            const formData = new FormData();
+            formData.append("file", file);
+            const { response: fr } = await APIfetch(
+                `/api/messages/${data.id}/media/`,
+                "POST",
+                true,
+                formData
+            );
+            if (!fr.ok) console.error("Ошибка загрузки файла", file.name);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await loadMessages(activeChatId);
+    }
+
+    messageInput.value = "";
+    messageInput.style.height = "40px";
+    attachedFiles = [];
+    renderFilePreview();
+}
+
+const messageInput = document.getElementById("messageInput");
+messageInput.addEventListener("input", () => {
+    messageInput.style.height = "40px";
+    messageInput.style.height = messageInput.scrollHeight + "px";
+});
 
 main();

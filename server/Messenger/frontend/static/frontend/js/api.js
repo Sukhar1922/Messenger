@@ -6,14 +6,18 @@ export async function APIfetch(link, method, withAccess = false, body = null) {
         headers["Authorization"] = "Bearer " + access;
     }
 
-    if (body && method !== "GET") {
+    const isFormData = body instanceof FormData;
+
+    if (body && method !== "GET" && !isFormData) {
         headers["Content-Type"] = "application/json";
     }
 
     const response = await fetch(link, {
         method,
         headers,
-        body: body ? JSON.stringify(body) : null
+        body: body
+            ? (isFormData ? body : JSON.stringify(body))
+            : null
     });
 
     const data = await response.json();
