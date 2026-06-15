@@ -70,18 +70,33 @@ class Message(models.Model):
     id = models.AutoField(primary_key=True)
     chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    text_content = models.TextField()
+    text_content = models.TextField(blank=True, default='')
     writed_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.text_content = encrypt(self.text_content)
+        if self.text_content:
+            self.text_content = encrypt(self.text_content)
         super().save(*args, **kwargs)
 
     @property
     def decrypted_text(self):
-        return decrypt(self.text_content)
+        return decrypt(self.text_content) if self.text_content else ''
 
     def __str__(self):
         return f'Сообщение от {self.user.nickname}'
 
+
+class Media(models.Model):
+    class FileType(models.TextChoices):
+        IMAGE = 'image', 'Изображение'
+        VIDEO = 'video', 'Видео'
+        AUDIO = 'audio', 'Аудио'
+        FILE  = 'file',  'Файл'
+
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='media')
+    file = models.FileField(upload_to='media/%Y/%m/%d/')
+    file_type = models.CharField(max_length=32, choices=FileType.choices)
+
+    def __str__(self):
+        return f'{self.file_type} к сообщению {self.message_id}'

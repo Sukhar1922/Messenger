@@ -83,9 +83,48 @@ class ChatSerializer(serializers.ModelSerializer):
         return msg.writed_at if msg else None
 
 
+class MediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Media
+        fields = ['id', 'message', 'file', 'file_type']
+        read_only_fields = ['id', 'message', 'file_type']
+
+    def validate_file(self, value):
+        allowed_types = {
+            'image/jpeg': 'image',
+            'image/png': 'image',
+            'image/webp': 'image',
+            'image/gif': 'image',
+            'video/mp4': 'video',
+            'video/webm': 'video',
+            'audio/mpeg': 'audio',
+            'audio/ogg': 'audio',
+            'application/pdf': 'file',
+            'application/zip': 'file',
+            'text/plain': 'file',
+            'application/msword': 'file',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'file',
+            'application/vnd.ms-excel': 'file',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'file',
+            'application/vnd.ms-powerpoint': 'file',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'file'
+        }
+        max_size = 20 * 1024 * 1024  # 20 МБ
+
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError('Недопустимый тип файла.')
+
+        if value.size > max_size:
+            raise serializers.ValidationError('Файл не должен превышать 20 МБ.')
+
+        self._file_type = allowed_types[value.content_type]
+        return value
+    
+
 class MessageSerializer(serializers.ModelSerializer):
     text_content = serializers.SerializerMethodField()
-    
+    media = MediaSerializer(many=True, read_only=True)
+
     def validate_text_content(self, value):
         return nh3.clean(value, tags=set())
     
@@ -97,7 +136,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'user',
             'text_content',
             'writed_at',
-            'is_read'
+            'is_read', 
+            'media'
         ]
         read_only_fields = [
             "id",
@@ -165,3 +205,4 @@ class AvatarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Файл не должен превышать 5 МБ.')
 
         return value
+    

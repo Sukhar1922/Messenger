@@ -14,8 +14,10 @@ from rest_framework import generics
 
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.openapi import OpenApiTypes
 
 
 
@@ -189,3 +191,35 @@ class AvatarUpdateView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'avatar': request.build_absolute_uri(self.request.user.avatar.url)})
+    
+
+class MediaUploadView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MediaSerializer
+    parser_classes = [parsers.MultiPartParser]
+
+    def perform_create(self, serializer):
+        message_id = self.kwargs['message_id']
+        message = get_object_or_404(Message, id=message_id)
+
+        if not message.chat.users.filter(id=self.request.user.id).exists():
+            raise PermissionDenied("Вы не состоите в этом чате.")
+
+        serializer.save(
+            message=message,
+            file_type=serializer._file_type
+        )
+
+@extend_schema(responses={200: OpenApiTypes.BINARY, 403: None})
+class MediaFileView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MediaSerializer
+
+    def get(self, request, media_id):
+        media = get_object_or_404(Media, id=media_id)
+
+        if not media.message.chat.users.filter(id=request.user.id).exists():
+            raise PermissionDenied()
+
+        return FileResponse(media.file.open('rb'))
+    
